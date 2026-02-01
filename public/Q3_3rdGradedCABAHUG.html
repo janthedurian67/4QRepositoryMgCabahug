@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Club Sign-Up System</title>
+<style>
+    body { font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px; }
+    .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    fieldset { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+    label { display: block; margin-bottom: 10px; font-weight: bold; }
+    input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    input[type="radio"] { width: auto; margin-right: 5px; }
+    
+    button { padding: 12px 24px; margin: 10px 5px 10px 0; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; transition: background 0.3s; }
+    button:hover { background-color: #0056b3; }
+    
+    .status-box { background-color: #e7f1ff; border: 1px solid #007bff; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
+    .radio-group { display: flex; gap: 20px; margin-top: 5px; }
+    .radio-label { font-weight: normal; cursor: pointer; display: flex; align-items: center; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #007bff; color: white; }
+    .hidden { display: none; }
+    .message { margin-top: 15px; font-weight: bold; }
+</style>
+
+<script>
+let signups = JSON.parse(localStorage.getItem("clubSignups") || "[]");
+
+function saveSignup(e) {
+    e.preventDefault();
+    if (!confirm("Are you sure you want to submit?")) return;
+
+    const data = Object.fromEntries(new FormData(e.target));
+    signups.push(data);
+    localStorage.setItem("clubSignups", JSON.stringify(signups));
+
+    alert("Sign-up saved successfully!");
+    e.target.reset();
+}
+
+function toggleView(showView) {
+    document.getElementById("signupSection").classList.toggle("hidden", showView);
+    document.getElementById("viewSection").classList.toggle("hidden", !showView);
+    if (showView) renderTable(signups);
+}
+
+function renderTable(list) {
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = list.length ? list.map(s => `<tr><td>${s.student_id}</td><td>${s.fullname}</td><td>${s.grade_level}</td><td>${s.club}</td></tr>`).join('') : '';
+    document.getElementById("total").textContent = "Total Sign-ups: " + list.length;
+    document.getElementById("message").textContent = list.length ? "" : "No sign-ups found.";
+}
+
+function filterClub() {
+    const club = document.getElementById("clubFilter").value;
+    renderTable(club === "ALL" ? signups : signups.filter(s => s.club === club));
+}
+</script>
+</head>
+<body>
+
+<div class="container">
+    <div id="signupSection">
+        <h2>Club Sign-Up Form</h2>
+        <form onsubmit="saveSignup(event)">
+            <fieldset>
+                <legend>Student Information</legend>
+                <label>Student ID: <input type="text" name="student_id" required></label>
+                <label>Full Name: <input type="text" name="fullname" required></label>
+                <label>Birthday: <input type="date" name="birthday" required></label>
+                <label>Email: <input type="email" name="email" required></label>
+            </fieldset>
+
+            <fieldset>
+                <legend>Application Details</legend>
+                <label>Mobile: <input type="tel" name="mobile" required></label>
+                <label>Grade Level:
+                    <select name="grade_level" required>
+                        <option value="">Select</option>
+                        <option>Gr. 7</option><option>Gr. 8</option><option>Gr. 9</option>
+                        <option>Gr. 10</option><option>Gr. 11</option><option>Gr. 12</option>
+                    </select>
+                </label>
+
+                <label>Status:</label>
+                <div class="status-box">
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="status" value="Intern" required> Intern</label>
+                        <label class="radio-label"><input type="radio" name="status" value="Extern"> Extern</label>
+                    </div>
+                </div>
+
+                <label>Preferred Club:
+                    <select name="club" required>
+                        <option value="">Select</option>
+                        <option>Flux</option><option>Labuyo</option><option>Alianti</option>
+                        <option>Pallastro</option><option>Volant</option>
+                    </select>
+                </label>
+                <label>Why do you want to join? <textarea name="reason" rows="4" required></textarea></label>
+            </fieldset>
+
+            <button type="submit">Submit</button>
+            <button type="button" onclick="toggleView(true)">View Sign-Ups</button>
+        </form>
+    </div>
+
+    <div id="viewSection" class="hidden">
+        <h2>View Club Sign-Ups</h2>
+        <label>Filter by Club:
+            <select id="clubFilter" onchange="filterClub()">
+                <option value="ALL">ALL</option>
+                <option>Flux</option><option>Labuyo</option><option>Alianti</option>
+                <option>Pallastro</option><option>Volant</option>
+            </select>
+        </label>
+        <table>
+            <thead><tr><th>Student ID</th><th>Full Name</th><th>Grade</th><th>Club</th></tr></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+        <div id="total"></div>
+        <div id="message" class="message"></div>
+        <button onclick="toggleView(false)">← Back to Sign-Up</button>
+    </div>
+</div>
+
+</body>
+</html>
