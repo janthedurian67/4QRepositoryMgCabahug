@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Add a Movie</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:white;
+}
+
+.container{
+    width:350px;
+    margin:50px auto;
+}
+
+input,select,button{
+    width:100%;
+    padding:8px;
+    margin:6px 0;
+}
+
+.star{
+    font-size:22px;
+    color:lightgray;
+    cursor:pointer;
+}
+
+.active{
+    color:gold;
+}
+
+.movie{
+    border:1px solid #ccc;
+    padding:8px;
+    margin-top:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Add a Movie</h2>
+
+<form id="form">
+
+Title:
+<input type="text" id="title" required>
+
+Year:
+<input type="number" id="year" required>
+
+Genre:
+<select id="genre">
+<option>Action</option>
+<option>Comedy</option>
+<option>Drama</option>
+<option>Horror</option>
+<option>Sci-Fi</option>
+</select>
+
+Rating:
+<div id="stars">
+<span class="star" data="1">★</span>
+<span class="star" data="2">★</span>
+<span class="star" data="3">★</span>
+<span class="star" data="4">★</span>
+<span class="star" data="5">★</span>
+</div>
+
+<br>
+<button>Add Movie</button>
+
+</form>
+
+<h3>Movie List</h3>
+<div id="list"></div>
+
+</div>
+
+<script>
+
+let rating = 0
+const stars = document.querySelectorAll(".star")
+
+stars.forEach((s,i)=>{
+    s.onclick = ()=>{
+        rating = i+1
+        stars.forEach(st=>st.classList.remove("active"))
+        for(let j=0;j<rating;j++) stars[j].classList.add("active")
+    }
+})
+
+function getMovies(){
+    return JSON.parse(localStorage.getItem("movies")) || []
+}
+
+function saveMovies(m){
+    localStorage.setItem("movies",JSON.stringify(m))
+}
+
+function showMovies(){
+    const list = document.getElementById("list")
+    list.innerHTML=""
+    let movies = getMovies()
+
+    movies.forEach(m=>{
+        let stars=""
+        for(let i=0;i<5;i++){
+            stars += i<m.rating ? "★" : "☆"
+        }
+
+        list.innerHTML +=
+        `<div class="movie">
+        ${m.title} (${m.year}) - ${m.genre}<br>
+        Rating: ${stars}
+        </div>`
+    })
+}
+
+document.getElementById("form").onsubmit = function(e){
+    e.preventDefault()
+
+    let movie = {
+        title:title.value,
+        year:year.value,
+        genre:genre.value,
+        rating:rating
+    }
+
+    let movies = getMovies()
+    movies.push(movie)
+
+    saveMovies(movies)
+    showMovies()
+
+    this.reset()
+    stars.forEach(s=>s.classList.remove("active"))
+    rating=0
+}
+
+showMovies()
+
+</script>
+
+</body>
+</html>
